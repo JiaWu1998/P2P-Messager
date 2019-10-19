@@ -1,16 +1,16 @@
 package com.example.p2p_messager_andriod;
-package com.spotify.android.appremote.api;
 
 import androidx.appcompat.app.AppCompatActivity;
-import android.os.Bundle;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
+import android.net.wifi.WpsInfo;
+import android.net.wifi.p2p.WifiP2pInfo;
+import android.os.Bundle;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pManager;
@@ -18,34 +18,39 @@ import android.net.wifi.p2p.WifiP2pManager.*;
 import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.NetworkInfo;
-import
+
 
 //import android.net.wifi.p2p.WifiP2pManager.ActionListener;
 //import android.net.wifi.p2p.WifiP2pManager.Channel;
 //import android.net.wifi.p2p.WifiP2pManager.ChannelListener;
 
-import android.os.Build;
-import android.os.Bundle;
-import android.provider.Settings;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class main extends AppCompatActivity {
+    //Global Vars used in multiple
+    ConnectionInfoListener connectionListener;
+    private static final String TAG = " " ;
+    Activity activity;
+    BroadcastReceiver receiver;
+    WifiP2pManager mManager;
     private final IntentFilter intentFilter = new IntentFilter();
     Channel channel;
     WifiP2pManager manager;
     private List<WifiP2pDevice> peers = new ArrayList<WifiP2pDevice>();
+
     private PeerListListener peerListListener = new PeerListListener() {
+
+
         @Override
         public void onPeersAvailable(WifiP2pDeviceList peerList) {
 
-            List<WifiP2pDevice> refreshedPeers = peerList.getDeviceList();
+            List<WifiP2pDevice> refreshedPeers = (List<WifiP2pDevice>) peerList.getDeviceList();
+
+
+
             if (!refreshedPeers.equals(peers)) {
                 peers.clear();
                 peers.addAll(refreshedPeers);
@@ -60,11 +65,12 @@ public class MainActivity extends AppCompatActivity {
             }
 
             if (peers.size() == 0) {
-                Log.d(WiFiDirectActivity.TAG, "No devices found");
+                Log.d(main.TAG, "No devices found");
                 return;
             }
         }
-    }
+    };
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -127,6 +133,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
+
+
         if (WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION.equals(action)) {
             // Determine if Wifi P2P mode is enabled or not, alert
             // the Activity.
@@ -143,10 +151,11 @@ public class MainActivity extends AppCompatActivity {
             // Request available peers from the wifi p2p manager. This is an
             // asynchronous call and the calling activity is notified with a
             // callback on PeerListListener.onPeersAvailable()
+
             if (mManager != null) {
                 mManager.requestPeers(channel, peerListListener);
             }
-            Log.d(WiFiDirectActivity.TAG, "P2P peers changed");
+            Log.d(this.TAG, "P2P peers changed");
 
         } else if (WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION.equals(action)) {
 
@@ -163,6 +172,7 @@ public class MainActivity extends AppCompatActivity {
 
                 // We are connected with the other device, request connection
                 // info to find group owner IP
+
 
                 manager.requestConnectionInfo(channel, connectionListener);
             }
@@ -218,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
     public void onConnectionInfoAvailable(final WifiP2pInfo info) {
 
         // InetAddress from WifiP2pInfo struct.
-        InetAddress groupOwnerAddress = info.groupOwnerAddress.getHostAddress();
+        String groupOwnerAddress = info.groupOwnerAddress.getHostAddress();
 
         // After the group negotiation, we can determine the group owner
         // (server).
