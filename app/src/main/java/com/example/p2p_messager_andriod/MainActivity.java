@@ -126,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(int reason) {
-                Toast.makeText(WiFiDirectActivity.this, "P2P group creation failed. Retry.",
+                Toast.makeText(MainActivity.this, "P2P group creation failed. Retry.",
                         Toast.LENGTH_SHORT).show();
             }
         });
