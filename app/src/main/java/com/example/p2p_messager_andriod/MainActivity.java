@@ -29,21 +29,24 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-public class main extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity {
     //Global Vars used in multiple
     ConnectionInfoListener connectionListener;
     private static final String TAG = " " ;
     Activity activity;
     BroadcastReceiver receiver;
+    private boolean isWifiP2pEnabled;
     WifiP2pManager mManager;
     private final IntentFilter intentFilter = new IntentFilter();
     Channel channel;
     WifiP2pManager manager;
     private List<WifiP2pDevice> peers = new ArrayList<WifiP2pDevice>();
 
+    public void setIsWifiP2pEnabled (boolean isWifiP2pEnabled){
+        this.isWifiP2pEnabled=isWifiP2pEnabled;
+    }
+
     private PeerListListener peerListListener = new PeerListListener() {
-
-
         @Override
         public void onPeersAvailable(WifiP2pDeviceList peerList) {
 
@@ -65,12 +68,11 @@ public class main extends AppCompatActivity {
             }
 
             if (peers.size() == 0) {
-                Log.d(main.TAG, "No devices found");
+                Log.d(MainActivity.TAG, "No devices found");
                 return;
             }
         }
     };
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -140,9 +142,9 @@ public class main extends AppCompatActivity {
             // the Activity.
             int state = intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, -1);
             if (state == WifiP2pManager.WIFI_P2P_STATE_ENABLED) {
-                activity.setIsWifiP2pEnabled(true);
+                this.setIsWifiP2pEnabled(true);
             } else {
-                activity.setIsWifiP2pEnabled(false);
+                this.setIsWifiP2pEnabled(false);
             }
         } else if (WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION.equals(action)) {
 
@@ -218,7 +220,7 @@ public class main extends AppCompatActivity {
 
             @Override
             public void onFailure(int reason) {
-                Toast.makeText(WiFiDirectActivity.this, "Connect failed. Retry.",
+                Toast.makeText(MainActivity.this, "Connect failed. Retry.",
                         Toast.LENGTH_SHORT).show();
             }
         });
