@@ -28,8 +28,7 @@ import android.util.Log;
 import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
-
-public class MainActivity extends AppCompatActivity {
+public class WiFiDirectActivity extends AppCompatActivity{
     //Global Vars used in multiple
     ConnectionInfoListener connectionListener;
     private static final String TAG = " " ;
@@ -68,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             if (peers.size() == 0) {
-                Log.d(MainActivity.TAG, "No devices found");
+                Log.d(this.TAG, "No devices found");
                 return;
             }
         }
@@ -126,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(int reason) {
-                Toast.makeText(MainActivity.this, "P2P group creation failed. Retry.",
+                Toast.makeText(WiFiDirectActivity.this, "P2P group creation failed. Retry.",
                         Toast.LENGTH_SHORT).show();
             }
         });
@@ -220,7 +219,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(int reason) {
-                Toast.makeText(MainActivity.this, "Connect failed. Retry.",
+                Toast.makeText(WiFiDirectActivity.this, "Connect failed. Retry.",
                         Toast.LENGTH_SHORT).show();
             }
         });
@@ -244,5 +243,4 @@ public class MainActivity extends AppCompatActivity {
             // to the group owner.
         }
     }
-
 }
