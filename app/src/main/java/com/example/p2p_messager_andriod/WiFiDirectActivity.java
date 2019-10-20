@@ -34,7 +34,7 @@ import java.util.List;
 public class WiFiDirectActivity extends AppCompatActivity {
     //Global Vars used in multiple
     ConnectionInfoListener connectionListener;
-    private static final String TAG = " " ;
+    public static final String TAG = " " ;
     Activity activity;
     BroadcastReceiver receiver;
     private boolean isWifiP2pEnabled;
@@ -246,5 +246,27 @@ public class WiFiDirectActivity extends AppCompatActivity {
             // you'll want to create a peer thread that connects
             // to the group owner.
         }
+    }
+
+    //resetData method clears all fields, remove peers, called
+    //When BroadcastReceiver receives state change
+
+    public void resetData(){
+        //Find all frags first, written in XML
+        DeviceListFragment fragmentList = (DeviceListFragment)getFragmentManager()
+                .findFragmentById(R.id.frag_list);
+        DeviceDetailFragment fragmentDetails = (DeviceDetailFragment)
+                getFragmentManager()
+                        .findFragmentById(R.id.frag_detail);
+
+        if(fragmentList != null){
+            fragmentList.clearPeers();
+        }
+
+        if(fragmentDetails != null){
+            fragmentDetails.resetViews();
+        }
+
+
     }
 }
