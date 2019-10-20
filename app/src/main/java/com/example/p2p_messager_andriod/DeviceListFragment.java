@@ -18,8 +18,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
-
-public class DeviceListFragment extends ListFragment implements PeerListListener{
+/**
+ * A ListFragment that displays available peers on discovery and requests the
+ * parent activity to handle user interaction events
+ */
+public class DeviceListFragment extends ListFragment implements PeerListListener {
     private List<WifiP2pDevice> peers = new ArrayList<WifiP2pDevice>();
     ProgressDialog progressDialog = null;
     View mContentView = null;
@@ -156,5 +159,4 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
         void connect(WifiP2pConfig config);
         void disconnect();
     }
-
 }

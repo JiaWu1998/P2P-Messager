@@ -1,196 +1,82 @@
 package com.example.p2p_messager_andriod;
 
-import androidx.appcompat.app.AppCompatActivity;
-
+import android.Manifest;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
-import android.net.wifi.WpsInfo;
-import android.net.wifi.p2p.WifiP2pInfo;
-import android.os.Bundle;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pManager;
-import android.net.wifi.p2p.WifiP2pManager.*;
-import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
-import android.net.wifi.p2p.WifiP2pDeviceList;
-import android.net.wifi.p2p.WifiP2pGroup;
-import android.net.NetworkInfo;
-
-
-//import android.net.wifi.p2p.WifiP2pManager.ActionListener;
-//import android.net.wifi.p2p.WifiP2pManager.Channel;
-//import android.net.wifi.p2p.WifiP2pManager.ChannelListener;
-
-import android.widget.ArrayAdapter;
+import android.net.wifi.p2p.WifiP2pManager.ActionListener;
+import android.net.wifi.p2p.WifiP2pManager.Channel;
+import android.net.wifi.p2p.WifiP2pManager.ChannelListener;
+import android.os.Build;
+import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
-import java.util.ArrayList;
-import java.util.List;
-
-public class WiFiDirectActivity extends AppCompatActivity {
-    //Global Vars used in multiple
-    ConnectionInfoListener connectionListener;
-    public static final String TAG = " " ;
-    Activity activity;
-    BroadcastReceiver receiver;
-    private boolean isWifiP2pEnabled;
-    WifiP2pManager mManager;
+import com.example.android.wifidirect.DeviceListFragment.DeviceActionListener;
+/**
+ * An activity that uses WiFi Direct APIs to discover and connect with available
+ * devices. WiFi Direct APIs are asynchronous and rely on callback mechanism
+ * using interfaces to notify the application of operation success or failure.
+ * The application should also register a BroadcastReceiver for notification of
+ * WiFi state related events.
+ */
+public class WiFiDirectActivity extends Activity implements ChannelListener, DeviceActionListener {
+    public static final String TAG = "wifidirectdemo";
+    private static final int PERMISSIONS_REQUEST_CODE_ACCESS_FINE_LOCATION = 1001;
+    private WifiP2pManager manager;
+    private boolean isWifiP2pEnabled = false;
+    private boolean retryChannel = false;
     private final IntentFilter intentFilter = new IntentFilter();
-    Channel channel;
-    WifiP2pManager manager;
-
-    private List<WifiP2pDevice> peers = new ArrayList<WifiP2pDevice>();
-
-    public void setIsWifiP2pEnabled (boolean isWifiP2pEnabled){
-        this.isWifiP2pEnabled=isWifiP2pEnabled;
+    private Channel channel;
+    private BroadcastReceiver receiver = null;
+    /**
+     * @param isWifiP2pEnabled the isWifiP2pEnabled to set
+     */
+    public void setIsWifiP2pEnabled(boolean isWifiP2pEnabled) {
+        this.isWifiP2pEnabled = isWifiP2pEnabled;
     }
-
-    private PeerListListener peerListListener = new PeerListListener() {
-        @Override
-        public void onPeersAvailable(WifiP2pDeviceList peerList) {
-
-            List<WifiP2pDevice> refreshedPeers = (List<WifiP2pDevice>) peerList.getDeviceList();
-
-
-
-            if (!refreshedPeers.equals(peers)) {
-                peers.clear();
-                peers.addAll(refreshedPeers);
-
-                // If an AdapterView is backed by this data, notify it
-                // of the change. For instance, if you have a ListView of
-                // available peers, trigger an update.
-                ((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
-
-                // Perform any other updates needed based on the new list of
-                // peers connected to the Wi-Fi P2P network.
-            }
-
-            if (peers.size() == 0) {
-                Log.d(WiFiDirectActivity.TAG, "No devices found");
-                return;
-            }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                           int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_CODE_ACCESS_FINE_LOCATION:
+                if  (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                    Log.e(TAG, "Fine location permission is not granted!");
+                    finish();
+                }
+                break;
         }
-    };
-
+    }
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        // Indicates a change in the Wi-Fi P2P status.
+        setContentView(R.layout.main);
+        // add necessary intent values to be matched.
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
-
-        // Indicates a change in the list of available peers.
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
-
-        // Indicates the state of Wi-Fi P2P connectivity has changed.
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
-
-        // Indicates this device's details have changed.
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
-
         manager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         channel = manager.initialize(this, getMainLooper(), null);
-
-        manager.discoverPeers(channel, new ActionListener() {
-
-            @Override
-            public void onSuccess() {
-                // Code for when the discovery initiation is successful goes here.
-                // No services have actually been discovered yet, so this method
-                // can often be left blank. Code for peer discovery goes in the
-                // onReceive method, detailed below.
-            }
-
-            @Override
-            public void onFailure(int reasonCode) {
-                // Code for when the discovery initiation fails goes here.
-                // Alert the user that something went wrong.
-            }
-        });
-
-        manager.requestGroupInfo(channel, new GroupInfoListener() {
-            @Override
-            public void onGroupInfoAvailable(WifiP2pGroup group) {
-                String groupPassword = group.getPassphrase();
-            }
-        });
-
-        manager.createGroup(channel, new ActionListener() {
-            @Override
-            public void onSuccess() {
-                // Device is ready to accept incoming connections from peers.
-            }
-
-            @Override
-            public void onFailure(int reason) {
-                Toast.makeText(WiFiDirectActivity.this, "P2P group creation failed. Retry.",
-                        Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        String action = intent.getAction();
-
-
-        if (WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION.equals(action)) {
-            // Determine if Wifi P2P mode is enabled or not, alert
-            // the Activity.
-            int state = intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, -1);
-            if (state == WifiP2pManager.WIFI_P2P_STATE_ENABLED) {
-                this.setIsWifiP2pEnabled(true);
-            } else {
-                this.setIsWifiP2pEnabled(false);
-            }
-        } else if (WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION.equals(action)) {
-
-            // The peer list has changed! We should probably do something about
-            // that.
-            // Request available peers from the wifi p2p manager. This is an
-            // asynchronous call and the calling activity is notified with a
-            // callback on PeerListListener.onPeersAvailable()
-
-            if (mManager != null) {
-                mManager.requestPeers(channel, peerListListener);
-            }
-            Log.d(this.TAG, "P2P peers changed");
-
-        } else if (WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION.equals(action)) {
-
-            // Connection state changed! We should probably do something about
-            // that.
-            if (manager == null) {
-                return;
-            }
-
-            NetworkInfo networkInfo = (NetworkInfo) intent
-                    .getParcelableExtra(WifiP2pManager.EXTRA_NETWORK_INFO);
-
-            if (networkInfo.isConnected()) {
-
-                // We are connected with the other device, request connection
-                // info to find group owner IP
-
-
-                manager.requestConnectionInfo(channel, connectionListener);
-            }
-
-        } else if (WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) {
-            DeviceListFragment fragment = (DeviceListFragment) activity.getFragmentManager()
-                    .findFragmentById(R.id.frag_list);
-            fragment.updateThisDevice((WifiP2pDevice) intent.getParcelableExtra(
-                    WifiP2pManager.EXTRA_WIFI_P2P_DEVICE));
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    WiFiDirectActivity.PERMISSIONS_REQUEST_CODE_ACCESS_FINE_LOCATION);
+            // After this point you wait for callback in
+            // onRequestPermissionsResult(int, String[], int[]) overridden method
         }
     }
-
     /** register the BroadcastReceiver with the intent values to be matched */
     @Override
     public void onResume() {
@@ -198,29 +84,89 @@ public class WiFiDirectActivity extends AppCompatActivity {
         receiver = new WiFiDirectBroadcastReceiver(manager, channel, this);
         registerReceiver(receiver, intentFilter);
     }
-
     @Override
     public void onPause() {
         super.onPause();
         unregisterReceiver(receiver);
     }
-
+    /**
+     * Remove all peers and clear all fields. This is called on
+     * BroadcastReceiver receiving a state change event.
+     */
+    public void resetData() {
+        DeviceListFragment fragmentList = (DeviceListFragment) getFragmentManager()
+                .findFragmentById(R.id.frag_list);
+        DeviceDetailFragment fragmentDetails = (DeviceDetailFragment) getFragmentManager()
+                .findFragmentById(R.id.frag_detail);
+        if (fragmentList != null) {
+            fragmentList.clearPeers();
+        }
+        if (fragmentDetails != null) {
+            fragmentDetails.resetViews();
+        }
+    }
     @Override
-    public void connect() {
-        // Picking the first device found on the network.
-        WifiP2pDevice device = peers.get(0);
-
-        WifiP2pConfig config = new WifiP2pConfig();
-        config.deviceAddress = device.deviceAddress;
-        config.wps.setup = WpsInfo.PBC;
-
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.action_items, menu);
+        return true;
+    }
+    /*
+     * (non-Javadoc)
+     * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.atn_direct_enable:
+                if (manager != null && channel != null) {
+                    // Since this is the system wireless settings activity, it's
+                    // not going to send us a result. We will be notified by
+                    // WiFiDeviceBroadcastReceiver instead.
+                    startActivity(new Intent(Settings.ACTION_WIRELESS_SETTINGS));
+                } else {
+                    Log.e(TAG, "channel or manager is null");
+                }
+                return true;
+            case R.id.atn_direct_discover:
+                if (!isWifiP2pEnabled) {
+                    Toast.makeText(WiFiDirectActivity.this, R.string.p2p_off_warning,
+                            Toast.LENGTH_SHORT).show();
+                    return true;
+                }
+                final DeviceListFragment fragment = (DeviceListFragment) getFragmentManager()
+                        .findFragmentById(R.id.frag_list);
+                fragment.onInitiateDiscovery();
+                manager.discoverPeers(channel, new WifiP2pManager.ActionListener() {
+                    @Override
+                    public void onSuccess() {
+                        Toast.makeText(WiFiDirectActivity.this, "Discovery Initiated",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                    @Override
+                    public void onFailure(int reasonCode) {
+                        Toast.makeText(WiFiDirectActivity.this, "Discovery Failed : " + reasonCode,
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+    @Override
+    public void showDetails(WifiP2pDevice device) {
+        DeviceDetailFragment fragment = (DeviceDetailFragment) getFragmentManager()
+                .findFragmentById(R.id.frag_detail);
+        fragment.showDetails(device);
+    }
+    @Override
+    public void connect(WifiP2pConfig config) {
         manager.connect(channel, config, new ActionListener() {
-
             @Override
             public void onSuccess() {
-                // WiFiDirectBroadcastReceiver notifies us. Ignore for now.
+                // WiFiDirectBroadcastReceiver will notify us. Ignore for now.
             }
-
             @Override
             public void onFailure(int reason) {
                 Toast.makeText(WiFiDirectActivity.this, "Connect failed. Retry.",
@@ -228,45 +174,65 @@ public class WiFiDirectActivity extends AppCompatActivity {
             }
         });
     }
-
     @Override
-    public void onConnectionInfoAvailable(final WifiP2pInfo info) {
-
-        // InetAddress from WifiP2pInfo struct.
-        String groupOwnerAddress = info.groupOwnerAddress.getHostAddress();
-
-        // After the group negotiation, we can determine the group owner
-        // (server).
-        if (info.groupFormed && info.isGroupOwner) {
-            // Do whatever tasks are specific to the group owner.
-            // One common case is creating a group owner thread and accepting
-            // incoming connections.
-        } else if (info.groupFormed) {
-            // The other device acts as the peer (client). In this case,
-            // you'll want to create a peer thread that connects
-            // to the group owner.
+    public void disconnect() {
+        final DeviceDetailFragment fragment = (DeviceDetailFragment) getFragmentManager()
+                .findFragmentById(R.id.frag_detail);
+        fragment.resetViews();
+        manager.removeGroup(channel, new ActionListener() {
+            @Override
+            public void onFailure(int reasonCode) {
+                Log.d(TAG, "Disconnect failed. Reason :" + reasonCode);
+            }
+            @Override
+            public void onSuccess() {
+                fragment.getView().setVisibility(View.GONE);
+            }
+        });
+    }
+    @Override
+    public void onChannelDisconnected() {
+        // we will try once more
+        if (manager != null && !retryChannel) {
+            Toast.makeText(this, "Channel lost. Trying again", Toast.LENGTH_LONG).show();
+            resetData();
+            retryChannel = true;
+            manager.initialize(this, getMainLooper(), this);
+        } else {
+            Toast.makeText(this,
+                    "Severe! Channel is probably lost premanently. Try Disable/Re-Enable P2P.",
+                    Toast.LENGTH_LONG).show();
         }
     }
-
-    //resetData method clears all fields, remove peers, called
-    //When BroadcastReceiver receives state change
-
-    public void resetData(){
-        //Find all frags first, written in XML
-        DeviceListFragment fragmentList = (DeviceListFragment)getFragmentManager()
-                .findFragmentById(R.id.frag_list);
-        DeviceDetailFragment fragmentDetails = (DeviceDetailFragment)
-                getFragmentManager()
-                        .findFragmentById(R.id.frag_detail);
-
-        if(fragmentList != null){
-            fragmentList.clearPeers();
+    @Override
+    public void cancelDisconnect() {
+        /*
+         * A cancel abort request by user. Disconnect i.e. removeGroup if
+         * already connected. Else, request WifiP2pManager to abort the ongoing
+         * request
+         */
+        if (manager != null) {
+            final DeviceListFragment fragment = (DeviceListFragment) getFragmentManager()
+                    .findFragmentById(R.id.frag_list);
+            if (fragment.getDevice() == null
+                    || fragment.getDevice().status == WifiP2pDevice.CONNECTED) {
+                disconnect();
+            } else if (fragment.getDevice().status == WifiP2pDevice.AVAILABLE
+                    || fragment.getDevice().status == WifiP2pDevice.INVITED) {
+                manager.cancelConnect(channel, new ActionListener() {
+                    @Override
+                    public void onSuccess() {
+                        Toast.makeText(WiFiDirectActivity.this, "Aborting connection",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                    @Override
+                    public void onFailure(int reasonCode) {
+                        Toast.makeText(WiFiDirectActivity.this,
+                                "Connect abort request failed. Reason Code: " + reasonCode,
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
         }
-
-        if(fragmentDetails != null){
-            fragmentDetails.resetViews();
-        }
-
-
     }
 }
