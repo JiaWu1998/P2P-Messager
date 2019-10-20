@@ -1,0 +1,56 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.example.p2p_messager_andriod"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="15"
+8-->/Users/blueshysky/Downloads/P2P/P2P-Messager/app/src/main/AndroidManifest.xml
+9        android:targetSdkVersion="29" />
+9-->/Users/blueshysky/Downloads/P2P/P2P-Messager/app/src/main/AndroidManifest.xml
+10
+11    <uses-permission
+11-->/Users/blueshysky/Downloads/P2P/P2P-Messager/app/src/main/AndroidManifest.xml:5:5-7:61
+12        android:name="android.permission.ACCESS_FINE_LOCATION"
+12-->/Users/blueshysky/Downloads/P2P/P2P-Messager/app/src/main/AndroidManifest.xml:7:5-59
+13        android:required="true" />
+13-->/Users/blueshysky/Downloads/P2P/P2P-Messager/app/src/main/AndroidManifest.xml:6:5-28
+14    <uses-permission
+14-->/Users/blueshysky/Downloads/P2P/P2P-Messager/app/src/main/AndroidManifest.xml:8:5-10:58
+15        android:name="android.permission.ACCESS_WIFI_STATE"
+15-->/Users/blueshysky/Downloads/P2P/P2P-Messager/app/src/main/AndroidManifest.xml:10:5-56
+16        android:required="true" />
+16-->/Users/blueshysky/Downloads/P2P/P2P-Messager/app/src/main/AndroidManifest.xml:9:5-28
+17    <uses-permission
+17-->/Users/blueshysky/Downloads/P2P/P2P-Messager/app/src/main/AndroidManifest.xml:11:5-13:58
+18        android:name="android.permission.CHANGE_WIFI_STATE"
+18-->/Users/blueshysky/Downloads/P2P/P2P-Messager/app/src/main/AndroidManifest.xml:13:5-56
+19        android:required="true" />
+19-->/Users/blueshysky/Downloads/P2P/P2P-Messager/app/src/main/AndroidManifest.xml:12:5-28
+20    <uses-permission
+20-->/Users/blueshysky/Downloads/P2P/P2P-Messager/app/src/main/AndroidManifest.xml:14:5-16:49
+21        android:name="android.permission.INTERNET"
+21-->/Users/blueshysky/Downloads/P2P/P2P-Messager/app/src/main/AndroidManifest.xml:16:5-47
+22        android:required="true" />
+22-->/Users/blueshysky/Downloads/P2P/P2P-Messager/app/src/main/AndroidManifest.xml:15:5-28
+23
+24    <application
+24-->/Users/blueshysky/Downloads/P2P/P2P-Messager/app/src/main/AndroidManifest.xml:18:5-24:56
+25        android:allowBackup="true"
+25-->/Users/blueshysky/Downloads/P2P/P2P-Messager/app/src/main/AndroidManifest.xml:19:9-35
+26        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+26-->[androidx.core:core:1.0.1] /Users/blueshysky/.gradle/caches/transforms-2/files-2.1/46da25c3e2ae6308b2227b660caa604d/core-1.0.1/AndroidManifest.xml:22:18-86
+27        android:debuggable="true"
+28        android:icon="@mipmap/ic_launcher"
+28-->/Users/blueshysky/Downloads/P2P/P2P-Messager/app/src/main/AndroidManifest.xml:20:9-43
+29        android:label="@string/app_name"
+29-->/Users/blueshysky/Downloads/P2P/P2P-Messager/app/src/main/AndroidManifest.xml:21:9-41
+30        android:roundIcon="@mipmap/ic_launcher_round"
+30-->/Users/blueshysky/Downloads/P2P/P2P-Messager/app/src/main/AndroidManifest.xml:22:9-54
+31        android:supportsRtl="true"
+31-->/Users/blueshysky/Downloads/P2P/P2P-Messager/app/src/main/AndroidManifest.xml:23:9-35
+32        android:theme="@style/AppTheme" />
+32-->/Users/blueshysky/Downloads/P2P/P2P-Messager/app/src/main/AndroidManifest.xml:24:9-40
+33
+34</manifest>
