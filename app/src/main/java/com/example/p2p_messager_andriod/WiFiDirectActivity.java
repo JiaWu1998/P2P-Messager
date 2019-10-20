@@ -15,6 +15,7 @@ import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.*;
+import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
 import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.NetworkInfo;
@@ -24,11 +25,13 @@ import android.net.NetworkInfo;
 //import android.net.wifi.p2p.WifiP2pManager.Channel;
 //import android.net.wifi.p2p.WifiP2pManager.ChannelListener;
 
+import android.widget.ArrayAdapter;
 import android.util.Log;
 import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
-public class WiFiDirectActivity extends AppCompatActivity{
+
+public class WiFiDirectActivity extends AppCompatActivity {
     //Global Vars used in multiple
     ConnectionInfoListener connectionListener;
     private static final String TAG = " " ;
@@ -39,6 +42,7 @@ public class WiFiDirectActivity extends AppCompatActivity{
     private final IntentFilter intentFilter = new IntentFilter();
     Channel channel;
     WifiP2pManager manager;
+
     private List<WifiP2pDevice> peers = new ArrayList<WifiP2pDevice>();
 
     public void setIsWifiP2pEnabled (boolean isWifiP2pEnabled){
@@ -93,7 +97,7 @@ public class WiFiDirectActivity extends AppCompatActivity{
         manager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         channel = manager.initialize(this, getMainLooper(), null);
 
-        manager.discoverPeers(channel, new WifiP2pManager.ActionListener() {
+        manager.discoverPeers(channel, new ActionListener() {
 
             @Override
             public void onSuccess() {
@@ -117,7 +121,7 @@ public class WiFiDirectActivity extends AppCompatActivity{
             }
         });
 
-        manager.createGroup(channel, new WifiP2pManager.ActionListener() {
+        manager.createGroup(channel, new ActionListener() {
             @Override
             public void onSuccess() {
                 // Device is ready to accept incoming connections from peers.
