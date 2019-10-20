@@ -67,7 +67,7 @@ public class WiFiDirectActivity extends AppCompatActivity{
             }
 
             if (peers.size() == 0) {
-                Log.d(this.TAG, "No devices found");
+                Log.d(WiFiDirectActivity.TAG, "No devices found");
                 return;
             }
         }
@@ -76,7 +76,7 @@ public class WiFiDirectActivity extends AppCompatActivity{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+        setContentView(R.layout.activity_main);
 
         // Indicates a change in the Wi-Fi P2P status.
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
